@@ -1,0 +1,109 @@
+<%inherit file="/base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%def name="header()">
+    ${parent.header()}
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#rando').AsyncForm({
+            onSuccess: function(data){
+                $.log('Nice job. You posted:', data);
+            }
+        });
+        
+        $('.async-link').click(function(e){
+            $.post(e.target.href, {}, function(data){
+                Q.notify('Rad. You clicked None');
+            }, 'json');
+            return false;
+        });
+        
+        $('.notify').click(function(){
+            Q.notify('This is a notification!');
+            return false;
+        });
+        
+        $('.warn').click(function(){
+            Q.warn('This is a warning');
+            return false;
+        });
+        
+        $('.error').click(function(){
+            Q.error('This is an error');
+            return false;
+        });
+    });
+    </script>
+</%def>
+
+<h1>Framework Exercise</h1>
+
+<p>Stuff that pylons + pylons_common + quaid is good at. This shows how Quaid and pylons_common
+integrate together in a seamless fashion</p>
+
+<h2>Form validation errors</h2>
+<p>On failure, our controller will throw a validation exception. The middleware will interpret
+the exception as an error and return a 400 response. Quaid will get the response and push the
+errors through the jQuery validation plugin, which will, in turn, fill out the errors in the form.
+On success, it will generate a couple duplicate queries and they will be visible in
+the debug bar.</p>
+
+<form id="rando" action="${h.url_for(controller='test', action='rando_form')}" method="post">
+    ${f.text_chunk('a_number', sublabel='any number')}
+    ${f.text_chunk('a_string', sublabel='less than 20 chars!')}
+    ${f.submit('Submit')}
+</form>
+
+<h2>Exceptions and app errors</h2>
+
+<p>These use an API function called api.error.explode_no_auth through the web-service interface.
+That function throws exceptions, and our middleware translates those exceptions into the proper
+http response. Quaid gets the response data and puts them into the proper place. If there is
+an error that is not 'handled' it will be popped up in the notification box at the top
+of the page. If it is a server error, the little debug bar will show the error, the traceback,
+and have a link to the proper pylons </p>
+
+<p><a href="${h.api_url('error', 'explode_no_auth', type='app')}" class="async-link">AppException (should result in 500)</a></p>
+
+<p>
+    <a href="${h.api_url('error', 'explode_no_auth', type='client')}" class="async-link">
+        ClientException(400)
+    </a> ;
+    <a href="${h.api_url('error', 'explode_no_auth', type='client404')}" class="async-link">
+        ClientException(404)
+    </a> ;
+    <a href="${h.api_url('error', 'explode_no_auth', type='client403')}" class="async-link">
+        ClientException(403)
+    </a>
+</p>
+
+<p><a href="${h.api_url('error', 'explode_no_auth', type='explosion')}" class="async-link">
+    Unintentional (divide by 0)
+</a></p>
+
+<p><a href="${h.api_url('error', 'explode_no_auth', type='http')}" class="async-link">
+    HTTPException(abort(404))
+</a></p>
+
+<p><a href="${h.api_url('error', 'explode_no_auth', type='none')}" class="async-link">
+    None!
+</a></p>
+
+<h2>Notifications</h2>
+
+<p>Quaid has a neat little extension called 'notifications'. It is a global notification box
+with a simple interface.</p>
+
+<pre class="prettyprint">
+Q.notify(string, string, ...);
+Q.warn(string, string, ...);
+Q.error(string, string, ...);
+</pre>
+
+<p>The notify and warn calls have a decay. They will only show for 10 seconds, then they will fade out.</p>
+
+<p>
+    <a href="#" class="notify">Notify the user</a> ;
+    <a href="#" class="warn">Warn the user</a> ;
+    <a href="#" class="error">Display an Error</a>
+</p>

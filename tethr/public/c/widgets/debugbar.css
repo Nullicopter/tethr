@@ -1,0 +1,66 @@
+/********* debug stuff ************/
+
+#fancy-debug-bar{
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	z-index: 4000;
+	height: 300px;
+}
+
+#fancy-debug-bar .mini{
+	font-weight: bold;
+	padding: 5px 8px;
+	background: #FFF0A9;
+	cursor: pointer;
+	line-height: 24px;
+}
+
+#fancy-debug-bar .last-error, #fancy-debug-bar .error-link{
+    float: right;
+    display: block;
+    padding: 0 5px;
+}
+#fancy-debug-bar .last-error{display: none;}
+
+#fancy-debug-bar .full{background: #fff;}
+#fancy-debug-bar #requests{height: 100%; overflow: auto;}
+#fancy-debug-bar .total-info{
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	background: #FFF0A9;
+}
+#fancy-debug-bar .request .info, #fancy-debug-bar .total-info{padding: 5px; cursor: pointer; height: 15px;}
+#fancy-debug-bar .request .info{
+	padding-left: 18px;
+	background: #f2f2f2 url(../../i/site/icon_arrow_right_10x10.png) 4px 8px no-repeat;
+	border-bottom: 1px solid #e0e0e0;
+}
+#fancy-debug-bar .request .info.open{background-image: url(../../i/site/icon_arrow_down_10x10.png);}
+
+#fancy-debug-bar .data-chunk{ padding-left: 20px; }
+#fancy-debug-bar .data{ font-weight: bold; }
+#fancy-debug-bar .data-chunk.first{ padding-left: 0; }
+#fancy-debug-bar .requested-url{ color: #999; }
+
+#fancy-debug-bar .request .queries, #fancy-debug-bar .request .detail{ display: none; }
+
+#fancy-debug-bar .request .queries .query{
+	border-bottom: 1px solid #e0e0e0;
+	padding: 5px 10px 5px 20px;
+}
+#fancy-debug-bar .request .queries .query .query-explanation,
+#fancy-debug-bar .request .queries .query .query-full-text{
+    margin: 5px 0;
+    padding: 10px;
+    background: #f5f5f5;
+    font-size: 9pt;
+    font-family: monaco, "Courier New", monospace;
+}
+#fancy-debug-bar .request .queries .query .query-time{margin-top: 5px;}
+
+#fancy-debug-bar .request .detail{padding: 5px 10px 5px 20px;}
+#fancy-debug-bar .request .detail .data{padding: 3px 0; font-weight: normal;}
+#fancy-debug-bar .request .detail .data.message{font-weight: bold;}
+#fancy-debug-bar .request .detail .trace{padding: 10px 0; background: #f5f5f5; font-size: 9pt;}

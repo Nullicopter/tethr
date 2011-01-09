@@ -1,0 +1,62 @@
+<%inherit file="base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%!
+    import pylons
+    from pylons_common.lib import date
+%>
+
+<%def name="header()">
+    ${parent.header()}
+    <style>
+        #q{width: 400px;}
+    </style>
+</%def>
+
+<h1>Admin Search</h1>
+
+<form action="${h.url_for(action='index')}">
+    ${f.text('q', label=None, value=c.query)}
+    ${f.submit(label='Search')}
+</form>
+
+% if c.results:
+    % if 'users' in c.results:
+        <h3 id="users" class="section-heading">Users</h3>
+        <div id="user-items">
+        % for user in c.results['users']:
+        
+            <div class="item">
+                <div>
+                    <span class="name">
+                        <a href="${h.url_for(controller='admin/inspect', action='user', eid=user.id)}" title="Inspect this user">
+                            % if user.first_name and user.last_name:
+                                ${user.first_name} ${user.last_name}
+                            % else:
+                                ${user.username}
+                            % endif
+                        </a>
+                    </span>
+                        (
+                        % if user.first_name and user.last_name and user.email != user.username:
+                            ${user.username} |
+                        % endif
+                        <a href="mailto:${user.email}">${user.email}</a> )
+                        
+                </div>
+                
+                <div>
+                    <a class="reload-link" href="${h.api_url('user', 'pretend', id=user.id)}">Pretend</a> |
+                    <a class="reload-link" href="${h.api_url('user', 'masquerade', id=user.id)}">Masquerade</a>
+                </div>
+                
+                <div class="meta">
+                    <span class="label">Last login</span> ${date.relative_date_str(user.last_login_date)};
+                    <span class="label">Registered</span> ${date.relative_date_str(user.created_date)}
+                </div>
+           </div>
+        
+        % endfor
+        </div>
+    % endif
+% endif

@@ -1,0 +1,23 @@
+<%inherit file="/base.html"/>
+<%namespace name="f" file="/forms.html"/>
+<%namespace name="r" file="/require.html"/>
+
+<%def name="header()">
+    ${parent.header()}
+    ${r.require('test')}
+    
+    <script type="text/javascript">
+        new Q.TestPage().readyrun();
+    </script>
+</%def>
+
+<p>To add tests, add a function to the TESTS global object. When the dom is ready, our little page
+will run everything in TESTS.</p>
+
+<h1 id="qunit-header">QUnit</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+
+<div id="qunit-fixture"></div>

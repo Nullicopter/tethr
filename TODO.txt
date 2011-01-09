@@ -1,0 +1,17 @@
+Stuff I want in this
+
+- user auth stuff
+  - openid? google accounts? other?
+- cache stuff
+  - fn decorator
+  - cache module for fns
+- debug bar
+  - query analyzer
+  - 500 error information
+- error handling stuff
+  - middleware for handling async big nasty errors
+  - generic error handling on the front end for client errors
+  - end to end fucking validation handling
+- client_async decorator
+- quaid lib
+- email system

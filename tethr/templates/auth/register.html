@@ -1,0 +1,23 @@
+<%inherit file="base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%!
+    import pylons
+%>
+
+<%def name="header()">
+    ${parent.header()}
+    <script type="text/javascript">
+        new Q.RegisterPage().readyrun();
+    </script>
+</%def>
+
+<h1>Register</h1>
+
+<form action="${h.url_for(controller='auth', action='register')}" method="post">
+    ${f.text_chunk('email')}
+    ${f.password_chunk('password')}
+    ${f.password_chunk('confirm_password')}
+    ${f.hidden('default_timezone')}
+    ${f.submit('Register')}
+</form>

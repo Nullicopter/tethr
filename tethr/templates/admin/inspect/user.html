@@ -1,0 +1,17 @@
+<%inherit file="base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%!
+    import pylons
+    from pylons_common.lib import date
+%>
+
+<%def name="header()">
+    ${parent.header()}
+    <style>
+    </style>
+</%def>
+
+<h1>${c.title}</h1>
+
+${self.render_attribute_table(c.obj, c.attrs, c.edit_url)}

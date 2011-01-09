@@ -1,0 +1,129 @@
+<%inherit file="../base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%def name="id_and_status(obj)">
+    <% 
+        fields = [str(obj.id)]
+        
+        if hasattr(obj, 'status'):
+            fields.append(obj.status)
+        
+        klass = "active"
+        if hasattr(obj, 'is_active'):
+            if not obj.is_active:
+                fields.append('inactive')
+                klass = "inactive"
+    %>        
+    <span class="${klass}">[${", ".join(fields)}]</span>
+</%def>
+
+<%def name="render_object(obj, show_actions=True)">
+    % if isinstance(obj, users.User):
+        <a href="${h.url_for(controller='admin/inspect', action='user', eid=user.id)}">${user.username}</a>
+        ${id_and_status(user)}
+        % if show_actions:
+            (<a class="reload-link" href="${h.api_url('user', 'pretend', u=user.id)}">Pretend</a>,
+            <a class="reload-link" href="${h.api_url('user', 'pretend', u=user.id)}">Masque</a>)
+        % endif
+    
+    % elif isinstance(obj, datetime):
+        <% dt = h.get_actual_user().as_local_time(obj) %>
+        ${main_utils.format_date(dt)}
+    % elif isinstance(obj, list) or isinstance(obj, tuple):
+        <div class="items">
+            % for o in obj:
+                <div class="item">${self.render_object(o)}</div>
+            % endfor
+        </div>
+    % else:
+        ${'%s' % obj or 'None' | n}
+    % endif
+</%def>
+
+<%def name="render_attribute_table(obj, attrs, edit_url, columns=2)">
+    <table class="attribute-table">
+        % for i, d in enumerate(attrs):
+            % if i % columns == 0:
+                <tr>
+            % endif
+            
+            <td>${d.get('label') or d.get('attr')}:
+            
+            <%def name="render_value(tag='div', data=False, **kw)">
+                <% k = ['%s=%s' % (k, v) for k, v in kw.items()] %>
+                <% val = d.get('value') or getattr(obj, d['attr']) %>
+                <${tag} ${'format' in d and 'format="%s"' % d['format'] or '' | n} ${data and 'data="%s"' % val or '' | n} ${' '.join(k)}>
+                    ${val}
+                </${tag}>
+            </%def>
+            
+            <%
+            edit = None
+            if 'edit' in d and d['edit'] != False and d['edit'] is not None:
+                edit = d['edit']
+                if edit == True:
+                    edit = type(getattr(obj, d['attr'])).__name__
+                elif isinstance(edit, list) or isinstance(edit, list):
+                    edit = 'select'
+            %>
+            
+            % if 'function' in d:
+                <div>${getattr(next, d['function'])(*[v for k, v in d.items() if k == 'value'])}</div>
+            
+            % elif edit and edit == 'select' or edit == 'bool':
+                % if edit == 'select':
+                    <% vals = [{'key': v, 'value': v} for v in d['edit']] %>
+                % elif edit == 'bool':
+                    <% vals = [{'key': True, 'value': True}, {'key': False, 'value': False}] %>
+                % endif
+                <% selected = getattr(obj, d['attr']) %>
+                
+                <div class="select-edit">
+                    <form method="post" action="${edit_url}" class="reload-form">
+                        ${f.dropdown(d['attr'], values=vals, selectedValue=selected)}
+                        ${f.submit(label='save')}
+                    </form>
+                </div>
+            
+            % elif edit:
+                <% val = d.get('value') or getattr(obj, d['attr']) %>
+                <div class="editable">
+                    ${render_value('span', type="text", id=d['attr'], data=True)}
+                    
+                    ##<span type="${params.get('type') or 'text'}" id="${d['attr']}" data="${d['value']}">${d['value']}</span>
+                    
+                    <a href="${edit_url}" class="edit-link" title="Edit this data">edit</a>
+                </div>
+            % else:
+                ${render_value()}
+            % endif
+            
+            </td>
+            
+            % if i % columns == columns-1:
+                </tr>
+            % endif
+        % endfor
+    </table>
+</%def>
+
+<%def name="datetime_range(dt)">
+    <% u = h.get_actual_user() %>
+    ${main_utils.format_date(dt[0], user=u)} - ${main_utils.format_date(dt[1], user=u)}
+</%def>
+
+<%def name="date_range(dt)">
+    <% u = h.get_actual_user() %>
+    ${main_utils.format_date(dt[0], user=u, include_time=False)} - ${main_utils.format_date(dt[1], user=u, include_time=False)}
+</%def>
+
+<%def name="section(name, when=True, hide=False)">
+    % if when:
+    <div class="inspect-section ${hide and 'hide' or ''}">
+        <h3 class="section-heading">${name}</h3>
+        <div class="content">${caller.body()}</div>
+    </div>
+    % endif
+</%def>
+
+${next.body()}

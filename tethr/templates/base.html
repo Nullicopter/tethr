@@ -1,0 +1,117 @@
+<%namespace name="f" file="/forms.html"/>
+<%namespace name="r" file="/require.html"/>
+
+<%!
+import pylons, simplejson as json
+from time import time
+from pylons import tmpl_context as c
+from tethr.lib import helpers as h
+from tethr.lib import auth as a
+%>
+<%
+if not c.meta:
+    c.meta = {}
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        % if c.meta:
+            % for name, content in c.meta.iteritems():
+                <meta name="${name}" content="${content.replace('"',r'\"')}"/>
+            % endfor
+        % endif
+        ## <link rel="Shortcut Icon" href="${h.static_url('i', 'favicon.ico')}" type="image/x-icon"/>
+        <title>${c.title or 'Welcome'} | tethr</title>
+		
+		<%def name="js_includes()">
+			${r.require_js('core')}
+        </%def>
+        ${self.js_includes()}
+        
+        <%def name="header()">
+			${r.require_css('core')}
+			
+			<!--[if IE]>
+            ${r.require_css('ie')}
+            <![endif]-->
+        </%def>
+        ${self.header()}
+        
+    </head>
+
+    <body id="${pylons.request.path.strip('/').replace('/','_')}" class="${a.is_logged_in() and 'user-logged-in' or ''}">
+		<div id="header"><header>
+			<div id="header-inner"><hgroup>
+                <div id="header-right">
+                
+                    <%
+                    real_user = a.get_real_user()
+                    user = a.get_user()
+                    %>
+                    % if real_user:
+                        <span class="user real-user">${real_user.username}</span>
+                        % if user and user.id != real_user.id:
+                            <span class="pretend-user user">[p: ${user.username}
+                            <a href="${h.api_url('user', 'stop_pretending')}" class="reload-link">stop</a>]</span>
+                        % endif
+                        % if a.is_admin():
+                        |
+                        <a href="${h.url_for(controller='admin/search', action='index')}">admin</a>
+                        % endif
+                        |
+                        <a href="${h.url_for(controller='auth', action='logout')}">logout</a>
+                    % else:
+                        <a href="${h.url_for(controller='auth', action='login')}">login</a>
+                        | <a href="${h.url_for(controller='auth', action='register')}">register</a>
+                    % endif
+                    
+                </div>
+                
+                <h1><a href="/">tethr</a></h1>
+                <h2>Make shit. Quickly.</h2>
+            </hgroup></div>
+		</header></div>
+		
+		<%def name="pre_content()"></%def>
+		${self.pre_content()}
+        <div id="page">
+            <div id="page-inner">
+                
+                ${next.body()}
+                
+                <div id="notification-display"></div>
+            </div>
+        </div> <!--page-->
+		<%def name="post_content()"></%def>
+		${self.post_content()}
+		
+		<div id="footer"><footer>
+			<div id="footer-inner">
+                <p>
+                    Copyright &copy; 2010 ben ogle
+                </p>
+            </div>
+		</footer></div>
+        
+        % if c.show_debug:
+            <div id="fancy-debug-bar"></div>
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    <% queries = sorted(c.queries, key=lambda x: -x[1]) %>
+                    <% jsonqueries = [{'query': q, 'time': t} for q, t in c.queries] %>
+                    window.DEBUG = $('#fancy-debug-bar').DebugBar({
+                    data:{
+                        'queries': ${len(c.queries)},
+                        'query_time': ${c.query_time or 0},
+                        'total_time': ${time() - c.render_start},
+                        'requested_url': '${c.requested_url | n}',
+                        'query_data': ${json.dumps(jsonqueries) | n}
+                    }
+                    });
+                });
+            </script>
+        % endif
+    </body>
+</html>

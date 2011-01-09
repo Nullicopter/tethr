@@ -1,0 +1,249 @@
+
+##
+## Atomic input functions
+##
+
+<%def name="password(name, value=None, className=None, **attrs)">
+    <% value = _get_value(name, value) %>
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'password text', className, **attrs) %>
+    <input type="password" name="${name}" value="${value}" ${disabled | n} ${attrs | n}/>
+</%def>
+
+<%def name="text(name, value=None, className=None, **attrs)">
+    <% value = _get_value(name, value) %>
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'text', className, **attrs) %>
+    <input type="text" name="${name}" value="${value}" ${disabled | n} ${attrs | n}/>
+</%def>
+
+<%def name="textarea(name, value=None, className=None, **attrs)">
+    <% value = _get_value(name, value) %>
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'textarea', className, **attrs) %>
+    <textarea name="${name}" ${disabled | n} ${attrs | n}>${value}</textarea>
+</%def>
+
+<%def name="hidden(name, value=None, className=None, **attrs)">
+    <% value = _get_value(name, value) %>
+    <% attrs = _get_attrs(name, 'hidden', className, **attrs) %>
+    <input type="hidden" name="${name}" value="${value}" ${attrs | n}/>
+</%def>
+
+## a select box!
+## values in the format: [{key: 'somekey', value: 'Some Value'}, {key: 'another', value: 'Another Value'}]
+## can pass in groups intermixed with the values:
+## [{key: 'somekey', value: 'Some Value'}, {group: 'My Group', values: [{key: 'another', value: 'Another Value'}]}]
+<%def name="dropdown(name, values=[], selectedValue=None, className=None, **attrs)">
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'hidden', className, **attrs) %>
+    <select name="${name}" ${disabled | n} ${attrs | n}>
+        % for item in values:
+            <% isgroup = 'group' in item and 'values' in item %>
+            % if isgroup:
+                <% gvals = item['values'] %>
+                <optgroup label="${item['group']}">
+            % else:
+                <% gvals = [item] %>
+            % endif
+            
+            % for option in gvals:
+                <option value="${option['key']}" ${option['key'] == selectedValue and 'selected="selected"' or '' | n}>${option['value']}</option>
+            % endfor
+            
+            % if isgroup:
+                </optgroup>
+            % endif
+        
+        % endfor
+    </select>
+</%def>
+
+<%def name="submit(label='', name=None, className=None, **attrs)">
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'submit', className, **attrs) %>
+    <input type="submit" value="${label}" ${disabled | n} ${attrs | n}/>
+</%def>
+
+<%def name="checkbox(name, checked=False, className=None, **attrs)">
+    <% checked = checked and 'checked="checked"' or '' %>
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'checkbox', className, **attrs) %>
+    <input type="checkbox" name="${name}" ${checked | n} ${disabled | n} ${attrs | n}/>
+</%def>
+
+<%def name="radio(name, value='', checked=False, className=None, **attrs)">
+    <% checked = checked and 'checked="checked"' or '' %>
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'radio', className, **attrs) %>
+    <input type="radio" name="${name}" value="${value}" ${checked | n} ${disabled | n} ${attrs | n}/>
+</%def>
+
+<%def name="file(name, className=None, **attrs)">
+    <% disabled = _get_disabled_state(attrs) %>
+    <% attrs = _get_attrs(name, 'file', className, **attrs) %>
+    <input type="file" name="${name}" ${disabled | n} ${attrs | n}/>
+</%def>
+
+##
+## Form Chunkage
+##
+
+<%def name="text_chunk(name, chunkId=None, chunkClass=None, label=None, sublabel=None, labelClass=None, value=None, info=None, tooltip=None, units=None, **inputAttrs)">
+    ${form_chunk_start(name, chunkId=chunkId, chunkClass=chunkClass, label=label, sublabel=sublabel, labelClass=labelClass, tooltip=tooltip)}
+    ${text(name, value=value, **inputAttrs)}
+    % if units == '$':
+        <span class="units">${units}</span>
+    % endif
+    ${form_chunk_info(info)}
+    % if units != '$':
+        <span class="units">${units}</span>
+    % endif
+    ${form_chunk_end()}
+</%def>
+
+<%def name="dropdown_chunk(name, chunkId=None, chunkClass=None, label=None, sublabel=None, labelClass=None, values=None, info=None, tooltip=None, selectedValue=None, **inputAttrs)">
+    ${form_chunk_start(name, chunkId=chunkId, chunkClass=chunkClass, label=label, sublabel=sublabel, labelClass=labelClass, tooltip=tooltip)}
+    ${dropdown(name, values=values, selectedValue=selectedValue, **inputAttrs)}
+    ${form_chunk_info(info)}
+    ${form_chunk_end()}
+</%def>
+
+<%def name="password_chunk(name, chunkId=None, chunkClass=None, label=None, sublabel=None, labelClass=None, value=None, info=None, tooltip=None, **inputAttrs)">
+    ${form_chunk_start(name, chunkId=chunkId, chunkClass=chunkClass, label=label, sublabel=sublabel, labelClass=labelClass, tooltip=tooltip)}
+    ${password(name, value=value, **inputAttrs) | n}
+    ${form_chunk_info(info)}
+    ${form_chunk_end()}
+</%def>
+
+<%def name="textarea_chunk(name, chunkId=None, chunkClass=None, label=None, sublabel=None, labelClass=None, value=None, info=None, tooltip=None, **inputAttrs)">
+    ${form_chunk_start(name, chunkId=chunkId, chunkClass=chunkClass, label=label, sublabel=sublabel, labelClass=labelClass, tooltip=tooltip)}
+    ${textarea(name, value=value, **inputAttrs)}
+    ${form_chunk_info(info)}
+    ${form_chunk_end()}
+</%def>
+
+<%def name="checkbox_chunk(name, text, checked=False, chunkId=None, chunkClass=None, label='', sublabel=None, labelClass=None, value=None, info=None, tooltip=None, **inputAttrs)">
+    ${form_chunk_start(name, chunkId=chunkId, chunkClass=chunkClass, label=label, sublabel=sublabel, labelClass=labelClass, tooltip=tooltip)}
+    ${checkbox(name, checked=checked, **inputAttrs) | n}
+    ${text | n}
+    ${form_chunk_info(info)}
+    ${form_chunk_end()}
+</%def>
+
+<%def name="submit_chunk(name=None, chunkId=None, chunkClass=None, label='', sublabel=None, labelClass=None, value=None, info=None, tooltip=None, **inputAttrs)">
+    ${form_chunk_start(name, chunkId=chunkId, chunkClass=chunkClass, label=None, sublabel=sublabel, labelClass=labelClass, tooltip=tooltip)}
+    ${submit(name, label=label, **inputAttrs) | n}
+    ${form_chunk_info(info)}
+    ${form_chunk_end()}
+</%def>
+
+##
+## _VERY_ common forms
+##
+
+<%def name="contact_form()">
+    <div id="contact">
+        <h3>Contact Us</h3>
+        % if h.is_signed_in():
+            <p>Leave us a message and we'll get in touch.</p>
+        % else:
+            <p>Leave your name and phone number or email address and we'll get in touch!</p>
+        % endif
+        <div class="thanks">
+            <h4>Thank you!</h4>
+            <p>We will email you within one business day. Hopefully today!</p>
+        </div>
+        <form id="contact_form" action="${h.url_for(controller='about', action='contact')}" method="post">
+			<div>${radio('department', value='Sales')}Sales${radio('department', value='Support')}Support</div>		
+            ${hidden('d', id='contact_d', value='')}
+            % if not h.is_signed_in():
+                <div>${text('name', title='Your name', autocomplete='off')}</div>
+                <div>${text('email', title='Your phone number or email', autocomplete='off')}</div>
+            % endif
+            <div>${textarea('message', title='Your message', autocomplete='off')}</div>
+            ${submit(label="", className="button-3")}
+        </form>
+    </div>
+</%def>
+
+##
+## Helper functions
+##
+
+<%def name="form_chunk_info(info, id=None)">
+    % if info:
+        <span class="form-info" ${id and 'id="%s"' % id or ''}>${info | n}</span>
+    % endif
+</%def>
+
+<%def name="form_chunk_label(name, label=None, sublabel=None, labelClass=None, id=None, tooltip=None)">
+    % if label == None or (isinstance(label, str) and len(label) > 0):
+        % if label or name:
+            <label for="${name}" class="form-label ${labelClass and '%s' % labelClass or '' | n}" ${id and 'id="%s"' % id or '' | n}>
+                ${label or _humanize(name) | n}
+                % if tooltip:
+                    <img src="${h.static_url('i', 'site/icon_help_16x16.png')}" class="tooltip" title="${tooltip}"/>
+                % endif
+            </label>
+        % endif
+        % if sublabel:
+            <div class="sublabel ${labelClass}">${sublabel | n}</div>
+        % endif
+    % endif
+</%def>
+
+<%def name="form_chunk_start(name, chunkId=None, chunkClass=None, label=None, sublabel=None, labelClass=None, labelId=None, tooltip=None)">
+    <div class='form-chunk ${chunkClass and '%s' % chunkClass or '' | n}' ${chunkId and 'id="%s"' % chunkId or '' | n}>
+        % if name or label:
+            ${form_chunk_label(name, label=label, sublabel=sublabel, labelClass=labelClass, id=labelId, tooltip=tooltip)}
+        % endif
+</%def>
+
+<%def name="form_chunk_end()">
+    </div>
+</%def>
+
+<%def name="_humanize(s)"><% return s.replace('_',' ').title() %></%def>
+
+##returns a string of name="value" pairs
+<%def name="_get_attrs(name, inputClass, userClass, **attrs)">
+    <%
+    if userClass:
+        userClass = '%s %s' % (inputClass, userClass)
+    else:
+        userClass = '%s' % inputClass
+    
+    ## If no id specified, we set it to the name! Yeah! Look at how rad this is!
+    if not attrs.has_key('id') and name:
+        attrs['id'] = name
+    if attrs.has_key('id') and not attrs['id']:
+        del attrs['id']
+
+    attrs['class'] = userClass
+    
+    ## escape() is from the ether! WooWoooo for magic!!!!
+    ## http://wiki.pylonshq.com/pages/viewpage.action?pageId=11174779
+    return ' '.join(['%s="%s"' % (k, escape(v)) for k, v in attrs.items()])
+    %>
+</%def>
+
+## gets the default value if it can. passed in value overrides!
+<%def name="_get_value(name, value)">
+    <%
+    if not value and c.form_defaults: value = c.form_defaults.get(name)
+    return value
+    %>
+</%def>
+
+## gets the disabled state from the attrs dictionary. returns an html attribute or an empty string.
+<%def name="_get_disabled_state(dict)">
+    <%
+    if dict.has_key('disabled'):
+        d = dict['disabled']
+        del dict['disabled']
+        if d == True:
+            return 'disabled="disabled"'
+    return ''
+    %>
+</%def>

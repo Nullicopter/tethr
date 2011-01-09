@@ -1,0 +1,32 @@
+<%inherit file="/base.html"/>
+<%namespace name="r" file="/require.html"/>
+<%
+tab_def = [
+    ('Search', h.url_for(controller='admin/search', action='index'), True),
+    ('Reports', '#'),
+    # add more!
+] %>
+<%def name="tabs(tab_def, current)">
+
+    <%def name="tab(label, url, first=False)">
+        <% cur = current == label %>
+        <a class="tab ${first and 'first' or ''} ${cur and 'current' or ''}" href="${url}">
+            ${label}
+        </a>
+    </%def>
+    <div id="admin-tabs">
+        
+        % for t in tab_def:
+            ${tab(*t)}
+        % endfor
+
+    </div>
+</%def>
+
+<%def name="js_includes()">
+    ${parent.js_includes()}
+    ${r.require('controllers.admin')}
+</%def>
+
+${self.tabs(tab_def, c.tab)}
+${next.body()}

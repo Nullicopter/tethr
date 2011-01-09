@@ -1,0 +1,3 @@
+[submodule "tethr/public/j/quaid"]
+	path = tethr/public/j/quaid
+	url = git://github.com/benogle/quaid.git

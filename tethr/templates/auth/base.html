@@ -1,0 +1,9 @@
+<%inherit file="/base.html"/>
+<%namespace name="r" file="/require.html"/>
+
+<%def name="js_includes()">
+    ${parent.js_includes()}
+    ${r.require('controllers.auth')}
+</%def>
+
+${next.body()}

@@ -1,0 +1,18 @@
+<%inherit file="base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%!
+    import pylons
+%>
+
+<%def name="header()">
+    ${parent.header()}
+</%def>
+
+<h1>Login</h1>
+
+<form action="${h.url_for(controller='auth', action='login')}" method="post">
+    ${f.text_chunk('username')}
+    ${f.password_chunk('password')}
+    ${f.submit('Login')}
+</form>

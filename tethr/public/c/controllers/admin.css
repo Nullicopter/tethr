@@ -1,0 +1,40 @@
+
+.attribute-table{width: 100%;}
+.attribute-table td{
+    width: 50%;
+    padding: 0 0 20px 0;
+    vertical-align: top;
+    text-align: left;
+}
+.attribute-table td{font-weight: bold;}
+.attribute-table td div{font-weight: normal;}
+.items .item{
+    margin: 15px 0;
+}
+.attribute-table td .items .item{
+    margin: 0;
+}
+
+#admin-tabs {
+    height: 35px;
+    padding-top: 5px;
+    border-bottom: 1px solid #eee;
+}
+#admin-tabs a, #admin-tabs a:active{
+    color: #888;
+    float: left;
+    display:block;
+    padding: 0 10px;
+    height: 35px;
+    line-height: 35px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    margin: 0 0 0 5px;
+    -moz-border-radius: 3px 3px 0 0;
+}
+#admin-tabs a:hover, #admin-tabs a.current{
+    color: #222;
+    border: 1px solid #aaa;
+    border-bottom: none;
+    background: #fff;
+}

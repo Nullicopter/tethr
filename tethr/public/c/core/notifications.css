@@ -1,0 +1,37 @@
+#notification-display{
+    position: fixed;
+    top: 0;
+    -moz-box-shadow: 0px 1px 8px #777;
+    -webkit-box-shadow: 0px 1px 8px #777;
+    box-shadow: 0px 1px 8px #777;
+    
+    -moz-border-radius: 0px 0px 5px 5px;
+    -webkit-border-radius: 0px 0px 5px 5px;
+    border-radius: 0px 0px 5px 5px;
+    z-index: 1001;
+    padding-bottom: 8px;
+}
+
+/*** error display ***/
+#error-display, #message-display, #warning-display{
+    padding: 5px 15px;
+    color: #fff;
+    width: 930px;
+    display: none;
+}
+#error-display .error, #message-display .message, #warning-display .warning{
+    margin: 10px 0 2px 0px;
+    font-weight: bold;
+}
+#error-display .dismiss, #message-display .dismiss, #warning-display .dismiss{
+    float: right;
+    margin-top: 10px;
+}
+
+#notification-display.message, #message-display{ background-color: #E4F3D3/*#66BB62*/; color: #000; }
+#notification-display.warning, #warning-display{ background-color: #FFFEF0; color: #000; }
+#notification-display.error, #error-display{ background-color: #fca; color: #c22;}
+
+#error-display .dismiss{color: #c55;}
+#message-display .dismiss{color: #66BB62;}
+#warning-display .dismiss{color: #9A5C24;}

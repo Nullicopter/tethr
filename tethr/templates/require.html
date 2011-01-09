@@ -1,0 +1,43 @@
+<%!
+import pylons
+from tethr.config.frontend_modules import JS, CSS
+%>
+
+<%def name="include_js(production_file, files)">
+    % if not c.debug_frontend:
+        <script type="text/javascript" src="${h.static_url('j', production_file)}" ></script>
+    % else:
+        % for f in files:
+            <script type="text/javascript" src="${h.static_url('j', f)}" ></script>
+        % endfor
+    % endif
+</%def>
+<%def name="include_css(production_file, files)">
+    % if not c.debug_frontend:
+        <link type="text/css" rel="stylesheet" href="${h.static_url('c', production_file)}" />
+    % else:
+        % for f in files:
+            <link type="text/css" rel="stylesheet" href="${h.static_url('c', f)}" />
+        % endfor
+    % endif
+</%def>
+
+<%def name="require_js(*modules)">
+    % for m in modules:
+        % if m in JS:
+            ${include_js(*JS[m])}
+        % endif
+    % endfor
+</%def>
+<%def name="require_css(*modules)">
+    % for m in modules:
+        % if m in CSS:
+            ${include_css(*CSS[m])}
+        % endif
+    % endfor
+</%def>
+
+<%def name="require(*modules)">
+    ${require_js(*modules)}
+    ${require_css(*modules)}
+</%def>

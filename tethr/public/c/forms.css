@@ -1,0 +1,83 @@
+.form-chunk{
+    margin: 0 0 20px 0;
+}
+
+.editable input, input.text, textarea{
+    padding: 5px;
+    font-family: arial, sans-serif;
+    font-size: 1.1em;
+	border: 1px solid #ccc;
+}
+
+/*form label*/
+.form-chunk label.form-label { 
+    color: #333;
+    margin: 0;
+    padding: 1px 0;
+    font-size: 12pt;
+    font-weight: bold;
+    display: block;
+}
+
+.form-chunk label.form-label.basic {
+	color: #333;
+    margin: 0;
+    padding: 1px 0;
+    font-size: 10pt; 
+	font-weight: normal; 
+	font-style: normal;
+}
+
+.form-chunk.inline-skinny label.form-label{
+	float: left;
+    display: block;
+    text-align: right;
+    width: 95px;
+    margin-right: 10px;
+    padding-top: 6px;
+	padding-left: 7px;
+}
+.form-chunk.inline-skinny .error-container .error{
+    padding: 0;
+}
+.form-chunk.inline-skinny .error-container,
+.form-chunk.inline-skinny .sublabel{
+    margin-left: 113px;
+}
+
+/*form sub-label*/
+.form-chunk div.sublabel { 
+    color: #777;
+    margin: 0;
+    font-size: 9pt;
+    padding: 0px 0 2px 0;
+    font-weight: normal;
+}
+
+.form-chunk label .explain-text {
+	color: #9f9f9f;
+}
+
+.form-chunk-inline{
+    float: left;
+    margin-right: 27px;
+}
+
+.form-chunk-inline-clear{
+    clear: left;
+}
+
+.error-container .error{
+    color: #c00;
+    font-size: 10pt;
+    font-weight: normal;
+}
+
+.error-container{
+    text-align: left;
+    margin-top: 3px;
+}
+
+input.error, textarea.error{
+    border: 1px solid #c00;
+}

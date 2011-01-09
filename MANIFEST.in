@@ -1,0 +1,3 @@
+include tethr/config/deployment.ini_tmpl
+recursive-include tethr/public *
+recursive-include tethr/templates *
