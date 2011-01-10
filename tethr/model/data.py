@@ -15,22 +15,28 @@ def now():
 
 class DataHandler(object):
     
-    def __init__(self, data):
+    def __init__(self, data=None):
         self.data = data
     
     @property
     def normalized(self):
-        return self.data.strip()
+        return self.normalize(self.data)
+    
+    @classmethod
+    def normalize(self, data):
+        return data.strip()
 
 class PhoneHandler(DataHandler):
-    @property
-    def normalized(self):
-        return re.sub('[^0-9]', '', self.data).strip()
+
+    @classmethod
+    def normalize(self, data):
+        return re.sub('[^0-9]', '', data).strip()
 
 class EmailHandler(DataHandler):
-    @property
-    def normalized(self):
-        return re.sub(r'(\+[^@]*)?', '', self.data.strip().lower())
+
+    @classmethod
+    def normalize(self, data):
+        return re.sub(r'(\+[^@]*)?', '', data.strip().lower())
 
 class DataPoint(Base):
     """
@@ -44,7 +50,7 @@ class DataPoint(Base):
     key = sa.Column(sa.Unicode(64), nullable=False, index=True)
     
     #work, home, etc.
-    type = sa.Column(sa.Unicode(16), nullable=False)
+    type = sa.Column(sa.Unicode(16), nullable=True)
     value = sa.Column(sa.Text())
     
     owner = relation("User", backref=backref("data_points", cascade="all"))

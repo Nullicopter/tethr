@@ -36,6 +36,9 @@ class Profile(Base):
         self.is_active = False
     
     def teather(self, other_profile):
+        """
+        same as following. self.teather(other) means the current profile is following 'other'
+        """
         q = Session.query(Teather)
         q = q.filter(Teather.teathered_profile_id==other_profile.id)
         existing = q.filter(Teather.owning_profile_id==self.id).first()
@@ -53,16 +56,6 @@ class Profile(Base):
         
         return new
     
-    def fetch_teathers(self, status=None, order_by='teathers.id', order_sort=sa.asc, teathered_profile=None):
-        q = Session.query(Teather).filter(Teather.owning_profile_id==self.id)
-        if status:
-            q = q.filter(status=status)
-        if teathered_profile:
-            q = q.filter(Teather.teathered_profile==teathered_profile)
-        q.order_by(order_sort(order_by))
-        
-        return q.all()
-    
     def add_data(self, user, key, value, type=u''):
         """
         Blindly adds data to a profile
@@ -74,6 +67,16 @@ class Profile(Base):
         d = data.DataPoint(profile=self, owner=user, key=key, value=handler.normalized, type=type)
         Session.add(d)
         return d
+    
+    def fetch_teathers(self, status=None, order_by='teathers.id', order_sort=sa.asc, teathered_profile=None):
+        q = Session.query(Teather).filter(Teather.owning_profile_id==self.id)
+        if status:
+            q = q.filter(status=status)
+        if teathered_profile:
+            q = q.filter(Teather.teathered_profile==teathered_profile)
+        q.order_by(order_sort(order_by))
+        
+        return q.all()
     
     def fetch_data(self, user=None):
         """

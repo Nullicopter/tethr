@@ -53,6 +53,7 @@ class TestUser(TestController):
         user.profile.add_data(user, 'email', 'something@else.com')
         self.flush()
         
+        # new users cannot use these email addresses.
         assert 'email' in self.throws_exception(lambda: api.user.create(name=u"jads", email=u'something@else.com', password=u'concon',
                                confirm_password=u'concon', default_timezone=u'-8')).error_dict
         assert 'email' in self.throws_exception(lambda: api.user.create(name=u"jasd", email=u'aoijd@omg.com', password=u'concon',
