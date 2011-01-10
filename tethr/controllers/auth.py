@@ -1,31 +1,11 @@
 from tethr.lib.base import *
 from tethr.model import users
+from tethr import api
 
 import formencode
 import formencode.validators as fv
 
 import sqlalchemy as sa
-
-class UniqueEmail(fv.FancyValidator):
-    def _to_python(self, value, state):
-        # we don't support multiple values, so we run a quick check here (we got a webapp where this was a problem)
-        if type(value) != type(u""):
-            raise fv.Invalid('You must supply a valid email.', value, state)
-        
-        user = Session.query(users.User).filter(sa.func.lower(users.User.email)==value.lower()).first()
-        # if this user is the same as the logged in one then don't throw the error - allows keeping old email address when editing contact info
-        if user and user != auth.get_user():
-            raise fv.Invalid('That user already exists. Please choose another.', value, state)
-        return value
-
-class RegisterForm(formencode.Schema):
-    
-    password = fv.UnicodeString(not_empty=True, min=5, max=32)
-    confirm_password = fv.UnicodeString(not_empty=True, min=5, max=32)
-    email = formencode.All(fv.Email(not_empty=True), fv.MaxLength(64), UniqueEmail())
-    default_timezone = fv.Int(not_empty=True)
-    
-    chained_validators = [fv.FieldsMatch('password', 'confirm_password')]
 
 class LoginForm(formencode.Schema):
     username = formencode.All(fv.UnicodeString(not_empty=True), fv.MaxLength(64))
@@ -66,21 +46,7 @@ class AuthController(BaseController):
     @mixed_response('register')
     def _do_register(self, **kw):
         
-        numusers = len(Session.query(users.User).all())
-        
-        scrubbed = self.validate(RegisterForm, **dict(request.params))
-        
-        user = users.User()
-        self.add(user)
-        
-        user.email = scrubbed.email
-        user.username = scrubbed.email
-        user.password = scrubbed.password
-        user.set_timezone_int(scrubbed.default_timezone)
-        
-        #first user is an admin. 
-        if numusers == 0:
-            user.role = users.ROLE_ADMIN
+        user = api.user.create(**dict(request.params))
         
         self.commit()
         

@@ -1,5 +1,5 @@
 from tethr.api import authorize, enforce, FieldEditor, convert_date
-from tethr.model import fixture_helpers as fh, Session, users
+from tethr.model import fixture_helpers as fh, Session, users, profiles
 from tethr import api
 from tethr.tests import *
 
@@ -14,6 +14,49 @@ class TestUser(TestController):
     
     def test_set_pref(self, admin=False):
         pass
+    
+    def test_create(self):
+        user = api.user.create(name=u"Jim Bob", email=u'aoijd+yeahman@omg.com', password=u'concon',
+                               confirm_password=u'concon', default_timezone=u'-8')
+        self.flush()
+        
+        assert user.profile
+        
+        keys = {
+            'name': u'Jim Bob',
+            'email': u'aoijd@omg.com'
+        }
+        for dp in user.profile.data_points:
+            assert dp.value == keys[dp.key]
+    
+    def test_create_unclaimed(self):
+        
+        #unclaimed profile!
+        profile = fh.create_profile(user=None, email=u'aoijd+yeahman@omg.com')
+        profile.add_data(fh.create_user(), 'email', u'aoijd+yeahman@omg.com')
+        self.flush()
+        l = len(Session.query(profiles.Profile).all())
+        uncl = profiles.Profile.find_unclaimed(u'aoijd@omg.com')
+        assert uncl
+        
+        user = api.user.create(name=u"Jim Bob", email=u'aoijd@omg.com', password=u'concon',
+                               confirm_password=u'concon', default_timezone=u'-8')
+        self.flush()
+        
+        # did not create a new one!
+        assert l == len(Session.query(profiles.Profile).all())
+        assert user.profile.id == profile.id
+        
+        uncl = profiles.Profile.find_unclaimed(u'aoijd@omg.com')
+        assert not uncl
+        
+        user.profile.add_data(user, 'email', 'something@else.com')
+        self.flush()
+        
+        assert 'email' in self.throws_exception(lambda: api.user.create(name=u"jads", email=u'something@else.com', password=u'concon',
+                               confirm_password=u'concon', default_timezone=u'-8')).error_dict
+        assert 'email' in self.throws_exception(lambda: api.user.create(name=u"jasd", email=u'aoijd@omg.com', password=u'concon',
+                               confirm_password=u'concon', default_timezone=u'-8')).error_dict
     
     def test_edit(self):
         own = fh.create_user()

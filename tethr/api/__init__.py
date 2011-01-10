@@ -221,4 +221,5 @@ class FieldEditor(object):
         return True
 
 import user
+import profile
 import error

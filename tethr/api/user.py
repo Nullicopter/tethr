@@ -2,7 +2,7 @@ from tethr.api import enforce, logger, validate, h, authorize, \
                     AppException, ClientException, CompoundException, \
                     INVALID, NOT_FOUND, FORBIDDEN, abort, FieldEditor, auth
 
-from tethr.model import users
+from tethr.model import users, Session, profiles, data
 import sqlalchemy as sa
 
 import formencode
@@ -13,6 +13,89 @@ ID_PARAM = 'u'
 ROLES = [users.ROLE_USER, users.ROLE_ADMIN, users.ROLE_ENGINEER]
 EDIT_FIELDS = ['password', 'first_name', 'last_name', 'default_timezone']
 ADMIN_EDIT_FIELDS = ['role', 'is_active', 'username']
+
+class UniqueEmail(fv.FancyValidator):
+    def __init__(self, user=None):
+        self.user = user
+    
+    def _to_python(self, value, state):
+        # we don't support multiple values, so we run a quick check here (we got a webapp where this was a problem)
+        if type(value) != type(u""):
+            raise fv.Invalid('You must supply a valid email.', value, state)
+        
+        handler = data.get_handler('email', value)
+        
+        P = profiles.Profile
+        DP = data.DataPoint
+        user = Session.query(users.User).filter(sa.func.lower(users.User.email)==handler.normalized).first()
+        profile = Session.query(P).join(DP).filter(P.user!=None).filter(DP.key==u'email').filter(DP.value==handler.normalized).first()
+        
+        # if this user is the same as the logged in one then don't throw the error -
+        # allows keeping old email address when editing contact info
+        if (user and user != self.user) or (profile and profile.user != self.user):
+            raise fv.Invalid('That user already exists. Please choose another.', value, state)
+        return value
+
+class RegisterForm(formencode.Schema):
+    
+    password = fv.UnicodeString(not_empty=True, min=5, max=32)
+    confirm_password = fv.UnicodeString(not_empty=True, min=5, max=32)
+    email = formencode.All(fv.Email(not_empty=True), fv.MaxLength(64), UniqueEmail())
+    default_timezone = fv.Int(not_empty=True)
+    username = fv.UnicodeString(not_empty=False, min=4, max=64)
+    first_name = fv.UnicodeString(not_empty=False, max=64)
+    last_name = fv.UnicodeString(not_empty=False, max=64)
+    name = fv.UnicodeString(not_empty=False, max=128)
+    
+    chained_validators = [fv.FieldsMatch('password', 'confirm_password')]
+
+@enforce(default_timezone=int)
+def create(**params):
+    """
+    Creates a user.
+    
+    DO NOT EXPOSE THIS to the web api. Please.
+    """
+    numusers = len(Session.query(users.User).all())
+    
+    scrubbed = validate(RegisterForm, **params)
+    
+    user = users.User()
+    Session.add(user)
+    
+    user.email = scrubbed.email
+    user.username = 'username' in scrubbed and scrubbed.username or scrubbed.email
+    user.password = scrubbed.password
+    user.set_timezone_int(scrubbed.default_timezone)
+    
+    if scrubbed.get('name'):
+        name = scrubbed.get('name').split(' ', 1)
+        user.first_name = name[0].strip()
+        user.last_name = len(name) == 2 and name[1].strip() or u''
+    else:
+        user.first_name = scrubbed.get('first_name')
+        user.last_name = scrubbed.get('last_name')
+    
+    #first user is an admin. 
+    if numusers == 0:
+        user.role = users.ROLE_ADMIN
+    
+    #this will need some thought. We should have some kind of verification.
+    profile = profiles.Profile.find_unclaimed(user.email)
+    if profile:
+        profile.user = user
+    else:
+        from tethr import api
+        profile = api.profile.create(user)
+    
+    if user.first_name or user.last_name:
+        profile.add_data(user, 'name', u'%s %s' % (user.first_name, user.last_name))
+    
+    profile.add_data(user, 'email', user.email)
+    
+    Session.flush()
+    
+    return user
 
 @enforce(key=unicode, value=unicode, use_real_user=bool)
 def set_pref(real_user, user, key, value, use_real_user=True):

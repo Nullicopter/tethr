@@ -5,6 +5,9 @@ import pylons.test
 
 from tethr.config.environment import load_environment
 from tethr.model.meta import Session, Base
+from tethr.model.users import User, UserPreference
+from tethr.model.profiles import Teather, Profile
+from tethr.model.data import DataPoint
 
 log = logging.getLogger(__name__)
 
