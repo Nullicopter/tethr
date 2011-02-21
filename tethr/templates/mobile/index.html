@@ -1,0 +1,134 @@
+<%inherit file="base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%!
+    import pylons
+    import simplejson as json
+%>
+
+<%def name="header()">
+    ${parent.header()}
+    <script type="text/javascript">
+        var params = {
+            profiles: ${json.dumps(c.profiles) | n}
+        };
+        new Q.IndexPage(params).readyrun();
+    </script>
+</%def>
+
+##
+## viewing a list of guys
+##
+
+<div data-role="page" id="listview">
+
+	<div data-role="header" data-backbtn="false">
+		<h1>tethrball</h1>
+        <a href="#add" data-icon="plus" class="ui-btn-right">Add</a>
+	</div><!-- /header -->
+
+	<div data-role="content" class="content">	
+		
+        
+	</div><!-- /content -->
+</div><!-- /page -->
+
+<script type="application/template" id="list-template">
+    <ul data-role="listview">
+    </ul>
+</script>
+
+<script type="application/template" id="list-item-template">
+    <li class="{{letter}}" id="{{id}}"><a href="#" rel="{{eid}}" class="profile">{{name}}</a></ul>
+</script>
+
+<script type="application/template" id="list-divider-template">
+    <li data-role="list-divider" id="{{id}}" class="list-divider">{{letter}}</ul>
+</script>
+
+##
+## editing a guy
+##
+
+<div data-role="page" id="add">
+
+	<div data-role="header" class="header" data-backbtn="false">
+        <a href="#view" data-icon="delete" class="cancel">Cancel</a>
+		<h1>Add</h1>
+        <a href="#" data-icon="check" class="save-button ui-btn-right">Save</a>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+		
+        <form class="boxed-form" action="${h.url_for(controller='mobile/auth', action='login')}" method="post">
+            <% attr = {'data-role': 'none'} %>
+            ${f.text_chunk('email', **attr)}
+            ${f.text_chunk('name', **attr)}
+            
+            ${f.textarea_chunk('notes')}
+        </form>
+        
+	</div><!-- /content -->
+</div><!-- /page -->
+
+<script type="application/template" id="text-template">
+    <div class="form-chunk">
+        <label for="{{key}}" class="form-label">
+            {{label}}
+        </label>
+        <input type="text" name="{{key}}" value="{{value}}" class="text"/>
+    </div>
+</script>
+
+<script type="application/template" id="textarea-template">
+    <div class="form-chunk">
+        <label for="{{key}}" class="form-label">
+            {{label}}
+        </label>
+        <textarea name="{{key}}" class="textarea">
+            {{value}}
+        </textarea>
+    </div>
+</script>
+
+##
+## viewing a guy
+##
+
+<div data-role="page" id="view">
+
+	<div class="header" data-role="header" data-backbtn="false">
+        <a href="#listview" data-icon="arrow-l">All</a>
+		<h1>Info</h1>
+        <a href="#add" data-icon="check" class="ui-btn-right">Edit</a>
+	</div><!-- /header -->
+
+	<div data-role="content" class="content">	
+		
+        
+	</div><!-- /content -->
+</div><!-- /page -->
+
+<script type="application/template" id="view-detail-template">
+    <h2 class="data-header">
+        <img src="{{url}}"/>
+        {{name}}
+    </h2>
+    
+    <div class="display-data">
+    
+    </div>
+</script>
+
+<script type="application/template" id="data-point-template">
+    <div class="data-point {{key}}">
+        <div class="label">{{key}}</div>
+        <div class="value">{{value}}</div>
+    </div>
+</script>
+
+
+
+
+
+

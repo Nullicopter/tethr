@@ -1,0 +1,31 @@
+<%inherit file="base.html"/>
+<%namespace name="f" file="/forms.html"/>
+
+<%!
+    import pylons
+%>
+
+<%def name="header()">
+    ${parent.header()}
+    <script type="text/javascript">
+        new Q.LoginPage().readyrun();
+    </script>
+</%def>
+
+<!-- Start of first page -->
+<div data-role="page" id="login">
+
+	<div data-role="header">
+		<h1>${c.title}</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+		
+        <form action="${h.url_for(controller='mobile/auth', action='login')}" method="post">
+            ${f.text_chunk('username')}
+            ${f.password_chunk('password')}
+            ${f.submit('Login')}
+        </form>
+        
+	</div><!-- /content -->
+</div><!-- /page -->

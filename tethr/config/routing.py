@@ -36,6 +36,11 @@ def make_map(config):
 
     map.connect('/admin', controller='admin/search', action='index')
     
+    map.connect('/m/{action}', controller='mobile/index', action='index')
+    map.connect('/m/', controller='mobile/index', action='index')
+    map.connect('/m', controller='mobile/index', action='index')
+    map.connect('/m/a/{action}', controller='mobile/auth', action='login')
+    
     map.connect('/{controller}/{action}')
     map.connect('/{controller}/{action}/{id}')
 

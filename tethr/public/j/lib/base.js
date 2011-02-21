@@ -9,6 +9,35 @@
 Q.Loader.defaults.image = '/i/loaders/16x16_arrows.gif';
 Q.AsyncForm.defaults.autoGenValidationOptions = true;
 
+//Mustache-like delimiters!
+_.templateSettings = {
+  interpolate : /\{\{(.+?)\}\}/g
+};
+
+// This is the fastest trim out there, apparently:
+// http://blog.stevenlevithan.com/archives/faster-trim-javascript
+String.prototype.trim = function() {
+    var str = this;
+	str = str.replace(/^\s+/, '');
+	for (var i = str.length - 1; i >= 0; i--) {
+		if (/\S/.test(str.charAt(i))) {
+			str = str.substring(0, i + 1);
+			break;
+		}
+	}
+	return str;
+}
+
+String.prototype.trimsplit = function(){
+    var arr = this.trim().split.apply(this, arguments);
+    var newarr = [];
+    for(var i = 0; i < arr.length; i++){
+        if(arr[i].length > 0)
+            newarr.push(arr[i]);
+    }
+    return newarr;
+};
+
 Q.defaultValidationOptions = {
     errorPlacement: function(error, element) {
         var errc = $('<div class="error-container"></div>');
@@ -22,6 +51,8 @@ Q.defaultValidationOptions = {
 };
 
 Q.Page = Q.Module.extend({
+    pageId:'#page',
+    
     init: function(settings){
         this.args = arguments;
         this.settings = settings;
@@ -37,7 +68,7 @@ Q.Page = Q.Module.extend({
     },
     
     run: function(){
-        this.container = $('#page');
+        this.container = $(this.pageId);
         this.delegateEvents();
         this.cacheNodes();
     }

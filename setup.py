@@ -14,7 +14,7 @@ setup(
     url='',
     install_requires=[
         "Pylons>=1.0",
-        "SQLAlchemy>=0.5",
+        "SQLAlchemy==0.6.6",
         "python-memcached==1.44",
         "sqlalchemy-migrate==0.6",
         "pytz==2010e",

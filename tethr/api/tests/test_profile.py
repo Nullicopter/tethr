@@ -49,3 +49,13 @@ class TestProfile(TestController):
             if dp.key == 'phone' and dp.type == 'work': assert dp.value == phone.normalize(k['phone:work'])
             if dp.key == 'phone' and dp.type == 'home': assert dp.value == phone.normalize(k['phone:home'])
         
+        
+        profile = api.profile.teather(p1.user, p1.user, email=u'unclaimed@poo.com', name=u'Some Guy')
+        assert profile
+        
+        dps = profile.fetch_data(user=p1.user)
+        print dps
+        d = dict([(p.key, p.value) for p in dps])
+        assert 'name' in d
+        assert 'email' in d
+        

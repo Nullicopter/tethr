@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relationship, backref
 from tethr.model.meta import Session, Base
 from tethr.model import STATUS_ACCEPTED, STATUS_REJECTED, STATUS_PENDING, data
 
@@ -7,6 +7,8 @@ from datetime import datetime
 
 from pylons_common.lib import exceptions, date
 from pylons_common.lib.utils import uuid
+
+from collections import defaultdict as dd
 
 def now():
     return datetime.utcnow()
@@ -19,7 +21,7 @@ class Profile(Base):
     
     eid = sa.Column(sa.Unicode(64), nullable=False, unique=True, index=True, default=uuid)
     
-    user = relation("User", backref=backref("profile", uselist=False, cascade="all"))
+    user = relationship("User", backref=backref("profile", uselist=False, cascade="all"))
     user_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'), nullable=True, index=True)
     
     #: is this profile active?
@@ -29,6 +31,31 @@ class Profile(Base):
     
     def __repr__(self):
         return "%s(%r,user:%r)" % (self.__class__.__name__, self.id, self.user_id)
+
+    @property
+    def url(self):
+        # import code for encoding urls and generating md5 hashes
+        import urllib, hashlib, pylons
+        
+        data = self.fetch_data()
+        email = None
+        for d in data:
+            if d.key == 'email':
+                email = d.value
+        
+        default = pylons.config.get('pylons_url') + '/i/icons/default_user.png'
+        
+        if email:
+            size = 40
+            
+            # construct the url
+            gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
+            gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+            
+            return gravatar_url
+        
+        return default
+
 
     def deactivate(self):
         """
@@ -63,9 +90,19 @@ class Profile(Base):
         if not user:
             raise exceptions.AppException('Gimmie a user', field=u'user', code=exceptions.INVALID)
         
+        #we overwrite any keys that were created by this user. 
+        q = Session.query(data.DataPoint).filter(data.DataPoint.profile==self)
+        q = q.filter(data.DataPoint.key==key)
+        q = q.filter(data.DataPoint.owner==user)
+        
+        d = q.first()
         handler = data.get_handler(key, value)
-        d = data.DataPoint(profile=self, owner=user, key=key, value=handler.normalized, type=type)
-        Session.add(d)
+        
+        if d:
+            d.value = handler.normalized
+        else:
+            d = data.DataPoint(profile=self, owner=user, key=key, value=handler.normalized, type=type)
+            Session.add(d)
         return d
     
     def fetch_teathers(self, status=None, order_by='teathers.id', order_sort=sa.asc, teathered_profile=None):
@@ -77,6 +114,11 @@ class Profile(Base):
         q.order_by(order_sort(order_by))
         
         return q.all()
+    
+    def fetch_teathered_profiles(self, status=None):
+        tethers = self.fetch_teathers(status=status)
+        
+        return [t.teathered_profile for t in tethers]
     
     def fetch_data(self, user=None):
         """
@@ -107,24 +149,17 @@ class Profile(Base):
         else:
             data_points = q.all()
         
-        #one name! and no duplicates
-        dset = set([])
-        points = []
-        name = None
+        points = dd(lambda: [])
         for dp in data_points:
-            sig = '%r:%r' % (dp.key, dp.value)
-            if dp.key == 'name' and dp.owner == self.user:
-                name = dp
-            elif dp.key == 'name' and not name:
-                name = dp
-            elif dp.key != 'name' and sig not in dset:
-                points.append(dp)
-                dset.add(sig)
+            sig = '%s:%s' % (dp.key, dp.type)
+            
+            #the data from user who owns the profile is more important
+            if dp.owner == self.user:
+                points[sig] = [dp]+points[sig]
+            else:
+                points[sig].append(dp)
         
-        if name:
-            points.append(name)
-        
-        return points
+        return [v[0] for k, v in points.items() if v]
     
     @classmethod
     def find_unclaimed(cls, email):
@@ -149,13 +184,13 @@ class Teather(Base):
     status = sa.Column(sa.Unicode(16), nullable=False)
     
     owning_profile_id = sa.Column(sa.Integer, sa.ForeignKey('profiles.id'), nullable=False, index=True)
-    owning_profile = relation("Profile", primaryjoin=owning_profile_id==Profile.id, backref=backref("owned_teathers", cascade="all"))
+    owning_profile = relationship("Profile", primaryjoin=owning_profile_id==Profile.id, backref=backref("owned_teathers", cascade="all"))
     
     teathered_profile_id = sa.Column(sa.Integer, sa.ForeignKey('profiles.id'), nullable=False, index=True)
-    teathered_profile = relation("Profile", primaryjoin=teathered_profile_id==Profile.id, backref=backref("inbound_teathers", cascade="all"))
+    teathered_profile = relationship("Profile", primaryjoin=teathered_profile_id==Profile.id, backref=backref("inbound_teathers", cascade="all"))
     
     reciprocated_teather_id = sa.Column(sa.Integer, sa.ForeignKey('teathers.id'), nullable=True, index=True, default=None)
-    reciprocated_teather = relation("Teather", remote_side=id, backref=backref("original_teather", uselist=False))
+    reciprocated_teather = relationship("Teather", remote_side=id, backref=backref("original_teather", uselist=False))
     
     created_date = sa.Column(sa.DateTime, nullable=False, default=now)
     

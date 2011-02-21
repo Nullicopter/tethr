@@ -92,7 +92,44 @@ class TestProfiles(TestController):
         assert teathers[0].teathered_profile.id == p2.id
         assert teathers[0].status == STATUS_REJECTED
         assert teathers[0].reciprocated_teather == None
+    
+    def test_add_data(self):
+        p = fh.create_profile()
+        p2 = fh.create_profile(name=u'Joey Walrustitty')
+        self.flush()
         
+        #p <-> p2; p added p3, p3 did not add p; p3 and p2 NOT connected
+        p.teather(p2).accept()
+        self.flush()
+        
+        #this should overwrite
+        p2.add_data(p2.user, 'myprop', u'Joey Set This')
+        self.flush()
+        p2.add_data(p.user, 'myprop', u'p set this')
+        self.flush()
+        
+        p2.add_data(p.user, 'property', u'blah')
+        self.flush()
+        p2.add_data(p.user, 'property', u'something else')
+        self.flush()
+        p2.add_data(p.user, 'property', u'something last')
+        self.flush()
+        
+        def test_exp(dps, exp):
+            assert len(exp.keys()) == len(dps)
+            for dp in dps:
+                assert exp[dp.key] == dp.value
+        
+        exp = {
+            'name': u'Joey Walrustitty',
+            'myprop': u'Joey Set This',
+            'property': u'something last',
+            'email': p2.user.email.lower()
+        }
+        d = p2.fetch_data(user=p.user)
+        test_exp(d, exp)
+        
+    
     def test_teathering_fetch_data(self):
         p = fh.create_profile()
         p2 = fh.create_profile(name=u'Joey Walrustitty')

@@ -14,6 +14,9 @@ ID_PARAM = 'u'
 EDIT_FIELDS = []
 ADMIN_EDIT_FIELDS = ['is_active']
 
+class TeatherForm(formencode.Schema):
+    email = fv.Email(not_empty=True)
+
 @enforce(email=unicode, profile=profiles.Profile)
 @authorize()
 def teather(real_user, user, profile=None, email=None, **kw):
@@ -30,22 +33,42 @@ def teather(real_user, user, profile=None, email=None, **kw):
     
     kw['notes'] = 'We met at the xyz blah'
     """
-    profile = get(real_user, user, profile=profile, email=email)
-    if not profile or not user.profile:
+    if (not profile and not email) or not user.profile:
         abort(403)
+    
+    profile = get(real_user, user, profile=profile, email=email)
+    if not profile and not email:
+        abort(403)
+    
+    #create unclaimed
+    elif not profile:
+        email = validate(TeatherForm, email=email).email
+        
+        profile = profiles.Profile(user=None)
+        Session.add(profile)
+        Session.flush()
     
     add_data(real_user, user, profile, **kw)
     
     #attach an email address...
-    email = email
     if not email and profile.user:
         email = profile.user.email
     
-    all_data = profile.fetch_data()
-    for d in all_data:
-        if d.key == 'email' and (not email or data.EmailHandler.normalize(email) == d.value):
-            profile.add_data(user, 'email', email, type=d.type)
-            break
+    
+    #all_data = profile.fetch_data()
+    #has_email = False
+    #for d in all_data:
+    #    if d.key == 'email':
+    #        has_email = True
+    #        if (email and data.EmailHandler.normalize(email) != d.value):
+    #            profile.add_data(user, 'email', email, type=d.type)
+    
+    #if not has_email and not email:
+    #    raise ClientException('Need to specify an email address!')
+    #elif not has_email:
+    
+    if email:
+        profile.add_data(user, 'email', email)
     
     user.profile.teather(profile)
     Session.flush()
@@ -55,6 +78,9 @@ def teather(real_user, user, profile=None, email=None, **kw):
 @enforce(profile=profiles.Profile)
 @authorize()
 def add_data(real_user, user, profile, **kw):
+    """
+    can pass in data like 'phone:work'='555-555-5555'
+    """
     if not profile:
         abort(403)
     
@@ -69,9 +95,10 @@ def add_data(real_user, user, profile, **kw):
         if len(s) == 2:
             k, type = s
         
-        scrubbed = validate(KVForm, key=k, value=v, type=type)
-        
-        profile.add_data(user, scrubbed.key, scrubbed.value, type=scrubbed.type)
+        if v:
+            scrubbed = validate(KVForm, key=k, value=v, type=type)
+            
+            profile.add_data(user, scrubbed.key, scrubbed.value, type=scrubbed.type)
     
     Session.flush()
     
@@ -80,14 +107,18 @@ def add_data(real_user, user, profile, **kw):
 @enforce(profile=profiles.Profile, email=unicode)
 @authorize()
 def get(real_user, user, profile=None, email=None):
-    if not profile and not email:
-        abort(403)
     
     if profile: return profile
     
-    handler = data.get_handler('email', email)
     P = profiles.Profile
     DP = data.DataPoint
+    
+    #fetch all
+    if not profile and not email:
+        return user.profile.fetch_teathered_profiles()
+    
+    # for email
+    handler = data.get_handler('email', email)
     profile = Session.query(P).join(DP).filter(DP.key==u'email').filter(DP.value==handler.normalized).first()
     return profile
 

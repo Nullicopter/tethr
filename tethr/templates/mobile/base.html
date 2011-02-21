@@ -1,0 +1,39 @@
+<%namespace name="f" file="/forms.html"/>
+<%namespace name="r" file="/require.html"/>
+
+<%!
+import pylons, simplejson as json
+from time import time
+from pylons import tmpl_context as c
+from tethr.lib import helpers as h
+from tethr.lib import auth as a
+%>
+<%
+if not c.meta:
+    c.meta = {}
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>${c.title or 'Welcome'} | tethr</title>
+		
+		<%def name="js_includes()">
+			${r.require_js('core')}
+        </%def>
+        ${self.js_includes()}
+        
+        <%def name="header()">
+			${r.require('mobile')}
+        </%def>
+        ${self.header()}
+        
+    </head>
+
+    <body id="${pylons.request.path.strip('/').replace('/','_')}" class="${a.is_logged_in() and 'user-logged-in' or ''}">
+		
+        ${next.body()}
+        
+    </body>
+</html>

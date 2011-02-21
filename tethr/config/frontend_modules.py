@@ -74,6 +74,12 @@ JS = {
         'test/test_base.js',
     ]),
     
+    'mobile': ('build/mobile.js',[
+        'include/jquery.mobile.js',
+        'lib/modules/mobile/base.js',
+        'lib/modules/mobile/pages.js'
+    ]),
+    
     'controllers.auth': ('build/controllers/auth.js', ['controllers/auth.js']),
     'controllers.admin': ('build/controllers/admin.js', [
         'controllers/admin/base.js'
@@ -95,6 +101,11 @@ CSS = {
     
     'ie': ('build/ie.css', ['ie.css']),
     
+    'mobile': ('build/modules/mobile.css',[
+        'modules/mobile/jquery.mobile.css',
+        'modules/mobile/base.css',
+    ]),
+        
     'controllers.admin': ('build/controllers/admin.css', [
         'controllers/admin.css'
     ])
