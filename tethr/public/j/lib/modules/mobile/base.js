@@ -112,7 +112,9 @@ Q.Profiles = Q.Collection.extend({
     model: Q.Profile,
     
     comparator: function(profile) {
-        return profile.getSortKey();
+        //var s = profile.get('created_date') ? -$.parseDate(profile.get('created_date')).getTime() : Number.MIN_VALUE;
+        //$.log(profile.getName(), s);
+        //return profile.getSortKey();
     },
     
     init: function(models, settings){

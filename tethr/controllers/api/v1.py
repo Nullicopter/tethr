@@ -2,6 +2,13 @@
 """
 
 from pylons_common.lib.utils import itemize
+from tethr.model.profiles import Teather
+
+DATE_FORMAT = '%Y-%m-%d %H:%M:%SZ'
+def fdatetime(dt):
+    if dt:
+        return dt.strftime(DATE_FORMAT)
+    return None
 
 def get_data_point(dp):
     return itemize(dp, 'key', 'value', 'type')
@@ -33,15 +40,24 @@ class user:
 class profile:
     
     class get(FunctionSerializer):
-        def output(self, p):
+        def output(self, t):
             
-            if isinstance(p, list):
-                return [self.output(pro) for pro in p]
+            if isinstance(t, list):
+                return [self.output(pro) for pro in t]
             
-            if not p:
+            if not t:
                 return None
             
+            if isinstance(t, Teather):
+                p = t.teathered_profile
+            else:
+                p = t
+            
             res = itemize(p, 'eid', 'is_active', 'url')
+            
+            if isinstance(t, Teather):
+                res['created_date'] = fdatetime(t.created_date)
+            
             res['id'] = res['eid']
             res['user'] = None
             if p.user:

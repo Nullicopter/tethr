@@ -70,10 +70,10 @@ def teather(real_user, user, profile=None, email=None, **kw):
     if email:
         profile.add_data(user, 'email', email)
     
-    user.profile.teather(profile)
+    t = user.profile.teather(profile)
     Session.flush()
     
-    return profile
+    return t
 
 @enforce(profile=profiles.Profile)
 @authorize()
@@ -115,7 +115,7 @@ def get(real_user, user, profile=None, email=None):
     
     #fetch all
     if not profile and not email:
-        return user.profile.fetch_teathered_profiles()
+        return user.profile.fetch_teathers()
     
     # for email
     handler = data.get_handler('email', email)

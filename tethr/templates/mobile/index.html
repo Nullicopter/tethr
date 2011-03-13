@@ -25,25 +25,36 @@
 	<div data-role="header" data-backbtn="false">
 		<h1>PQ</h1>
         <a href="#add" data-icon="plus" class="ui-btn-right">Add</a>
+        
 	</div><!-- /header -->
-
-	<div data-role="content" class="content">	
-		
+    
+    <div data-role="navbar">
+            <ul id="mode-links">
+                <li><a href="#" class="ui-btn-active" rel="created_date">By Time Added</a></li>
+                <li><a href="#" rel="alpha">By Name</a></li>
+            </ul>
+        </div><!-- /navbar -->
+	<div data-role="content" class="content">
         
 	</div><!-- /content -->
+    
 </div><!-- /page -->
 
 <script type="application/template" id="list-template">
-    <ul data-role="listview">
+    <ul data-role="listview" class="list-view">
     </ul>
 </script>
 
 <script type="application/template" id="list-item-template">
-    <li class="{{letter}} list-item" id="{{id}}"><a href="#" rel="{{eid}}" class="profile">{{name}}</a></ul>
+    <li class="{{letter}} list-item ui-li-has-thumb" id="{{id}}">
+        <img class="avatar ui-li-thumb" src="{{url}}" />
+        <h3><a href="#" rel="{{eid}}" class="profile">{{name}}</a></h3>
+        <p>{{notes}} <span class="created_date">{{created_date}}</span></p>
+    </li>
 </script>
 
 <script type="application/template" id="list-divider-template">
-    <li data-role="list-divider" id="{{id}}" class="list-divider">{{letter}}</ul>
+    <li data-role="list-divider" id="{{id}}" class="list-divider">{{letter}}</li>
 </script>
 
 ##
@@ -111,7 +122,7 @@
 
 <script type="application/template" id="view-detail-template">
     <h2 class="data-header">
-        <img src="{{url}}"/>
+        <img class="avatar" src="{{url}}"/>
         <div class="name">{{name}}</div>
     </h2>
     

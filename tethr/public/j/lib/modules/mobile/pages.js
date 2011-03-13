@@ -131,14 +131,15 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
     letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
     
     events: {
-        'click .profile': 'clickProfile'
+        'click .profile': 'clickProfile',
+        'click #mode-links a': 'changeMode'
     },
     
-    n:{content: '.content'},
+    n:{content: '.content', modeLinks: '#mode-links'},
     
     init: function(container, settings){
         this._super(container, settings);
-        _.bindAll(this, 'onAddProfile', 'onUpdateProfile', 'onRemoveProfile')
+        _.bindAll(this, 'onAddProfile', 'onUpdateProfile', 'onRemoveProfile', 'onRefresh')
         var self = this;
         
         self.template = $(this.template);
@@ -148,17 +149,32 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
         self.settings.profiles.bind('add', this.onAddProfile);
         self.settings.profiles.bind('remove', this.onRemoveProfile);
         self.settings.profiles.bind('change', this.onUpdateProfile);
+        self.settings.profiles.bind('refresh', this.onRefresh);
         
         //de select the current profile when they view this page.
         self.container.bind('pagebeforeshow', function(){self.settings.current.set({profile:null}, {silent:true})});
         
         self.render();
+        
+        this.mode = this.n.modeLinks.find('a.ui-btn-active').attr('rel') || 'created_date';
+    },
+    
+    changeMode: function(e){
+        var t = $(e.target);
+        if(!t.is('a')) t = t.parents('a');
+        
+        var mode = t.attr('rel');
+        if(mode != this.mode){
+            $.log('Mode set to ', mode, e, t);
+            this.mode = mode;
+            this.reorder();
+        }
     },
     
     render: function(){
         this.n.content.html(_.template(this.template.html(), {}));
         
-        this.list = this.$('ul');
+        this.list = this.$('ul.list-view');
         var div = this.dividerTemplate.html();
         
         for(var i = 0; i < this.letters.length; i++){
@@ -198,8 +214,7 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
     
     onUpdateProfile: function(m){
         $.log('updating profile!', m);
-        var item = this.list.find('#'+m.cid);
-        item.remove();
+        m.view.remove();
         this.onAddProfile(m, m.collection);
         this.hideEmptyItems();
     },
@@ -211,31 +226,72 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
         this.hideEmptyItems();
     },
     
-    onAddProfile: function(m, coll){
+    onAddProfile: function(m, coll, opts){
+        this.handleNewModel(m);
+        //coll.sort();
+        
+        if(!m.isNew())
+            this.reorder();
+    },
+    
+    onRefresh: function(){
+        $.log('refreshing');
+        var models = this.settings.profiles;
+        for(var i = 0; i < models.length; i++)
+            this.handleNewModel(models.at(i));
+        this.reorder();
+    },
+    
+    handleNewModel: function(m){
         var name = m.getName();
         
         var letter = m.getSortKey()[0].toUpperCase();
         var letterObj = this.$('.'+letter + ':last');
         
+        var data = m.get('data');
         var item = $(_.template(this.itemTemplate.html(), {
             name: name,
+            url: m.get('url'),
+            created_date: $.relativeDateStr($.parseDate(m.get('created_date'), 'Y.m.d H:M:S')),
+            notes: data.notes,
             eid: m.get('eid') || '',
             letter: letter,
             id: m.cid
         }));
-        
-        if(letterObj.length)
-            item.insertAfter(letterObj);
-        else{
+        m.view = item;
+    },
+    
+    insertProfileMarkup: function(m, view){
+        if(this.mode == 'alpha'){
+            var letter = m.getSortKey()[0].toUpperCase();
+            var letterObj = this.$('.'+letter + ':last');
+            
             letterObj = this.$('#'+letter);
-            item.insertAfter(letterObj);
+            view.insertAfter(letterObj);
             letterObj.show();
         }
+        else{
+            this.list.append(view);
+        }
+    },
+    
+    reorder: function(){
+        var models = this.settings.profiles.models;
+        this.$('.list-divider').hide();
         
-        $.log('showing', name, m, letter, letterObj, this.$('#'+letter));
+        if(this.mode == 'alpha'){
+            
+            //sort by last name
+            models = this.settings.profiles.sortBy(function(val){
+                return val.getSortKey();
+            });
+        }
         
-        if(!m.isNew())
-            this.refresh();
+        for(var i = 0; i < models.length; i++){
+            var m = models[i];
+            this.insertProfileMarkup(m, m.view);
+        }
+        this.refresh();
     }
 });
 
@@ -310,7 +366,7 @@ Q.IndexPage = Q.MobilePage.extend({
         this._super.apply(this, arguments);
         _.bindAll(this, 'onAddNewProfile', 'onViewProfile', 'onEditedProfile');
         
-        this.profiles = new Q.Profiles([]);
+        this.profiles = new Q.Profiles(this.settings.profiles);
         this.current = new Backbone.Model({});
         
         var params = {
@@ -330,9 +386,9 @@ Q.IndexPage = Q.MobilePage.extend({
         
         this.addPage.bind('editedprofile', this.onEditedProfile);
         
-        this.profiles.add(this.settings.profiles);
+        this.profiles.trigger('refresh');
         
-        this.listPage.refresh();
+        this.listPage.reorder();
         
         var active = $.mobile.activePage;
         $.log(active);

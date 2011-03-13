@@ -105,7 +105,7 @@ class Profile(Base):
             Session.add(d)
         return d
     
-    def fetch_teathers(self, status=None, order_by='teathers.id', order_sort=sa.asc, teathered_profile=None):
+    def fetch_teathers(self, status=None, order_by='teathers.created_date', order_sort=sa.asc, teathered_profile=None):
         q = Session.query(Teather).filter(Teather.owning_profile_id==self.id)
         if status:
             q = q.filter(status=status)
