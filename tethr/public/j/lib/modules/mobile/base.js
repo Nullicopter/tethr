@@ -9,13 +9,48 @@ Q.Profile = Q.Model.extend({
         'update': '/api/v1/profile/add_data'
     },
     
+    nameMap: {
+        email: 'Email',
+        tags: 'Tags',
+        notes: 'Notes'
+    },
+    
+    sortKeys: {
+        email: 1,
+        tags: 2,
+        notes: 3
+    },
+    
+    datasortFn: function(left, right){
+        lnum = this.sortKeys[left];
+        rnum = this.sortKeys[right];
+        
+        //the ones in sortKeys come first!
+        if(lnum && rnum) return lnum - rnum;
+        if(lnum) return -lnum;
+        if(rnum) return rnum;
+        
+        if(left > right)
+            return 3;
+        else if (left < right)
+            return -3;
+        
+        return 0;
+    },
+    
     init: function(model, settings){
         model.id = model.eid;
+        _.bindAll(this, 'datasortFn');
         
         this._super.apply(this, arguments);
     },
     
     parse: function(data){
+        if(this.collection && this.isNew()){
+            $.log('Removing Duplicate', this.collection, data.results.id);
+            this.collection.remove(data.results.id);
+        }
+        
         $.log('Parsing profile success', data.results);
         return data.results;
     },
@@ -29,9 +64,18 @@ Q.Profile = Q.Model.extend({
     getData: function(){
         var data = this.get('data');
         if(data){
-            data = _.clone(data);
-            if('name' in data)
-                delete data['name'];
+            //data = _.clone(data);
+            var keys = [];
+            for(var k in data)
+                keys.push(k);
+            keys.sort(this.datasortFn);
+            $.log(keys);
+            
+            var d = {};
+            for(var i = 0; i < keys.length; i++)
+                if(keys[i] != 'name')
+                d[keys[i]] = data[keys[i]];
+            data = d;
         }
         
         return data;

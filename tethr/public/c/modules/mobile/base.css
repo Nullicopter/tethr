@@ -14,7 +14,7 @@
     border-top: none;
 }
 
-.boxed-form .form-chunk label, .boxed-form .form-chunk label.ui-input-text{
+.boxed-form .form-chunk label, .boxed-form .form-chunk .label, .boxed-form .form-chunk label.ui-input-text{
     width: 20%;
     text-align: right;
     font-weight: bold;
@@ -35,7 +35,7 @@
     font-size: 9pt;
     margin: 2px 0 0 0;
 }
-.boxed-form .form-chunk textarea{
+.boxed-form .form-chunk textarea, .boxed-form .form-chunk .value{
     border: none;
     float: right;
     width: 73%;
@@ -53,4 +53,26 @@
 
 .boxed-form .error-container{
     display: none;
+}
+
+.boxed-form a{
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+}
+.boxed-form a:hover{
+    text-decoration: underline;
+}
+
+.data-header img{
+    width: 40px;
+    float: left;
+    display: block
+}
+.data-header{margin-top: 0;}
+.data-header .name{
+    line-height: 45px;
+    height: 40px;
+    margin-left: 50px;
+    font-size: 15pt;
 }

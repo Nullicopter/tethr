@@ -23,7 +23,7 @@
 <div data-role="page" id="listview">
 
 	<div data-role="header" data-backbtn="false">
-		<h1>tethrball</h1>
+		<h1>PQ</h1>
         <a href="#add" data-icon="plus" class="ui-btn-right">Add</a>
 	</div><!-- /header -->
 
@@ -39,7 +39,7 @@
 </script>
 
 <script type="application/template" id="list-item-template">
-    <li class="{{letter}}" id="{{id}}"><a href="#" rel="{{eid}}" class="profile">{{name}}</a></ul>
+    <li class="{{letter}} list-item" id="{{id}}"><a href="#" rel="{{eid}}" class="profile">{{name}}</a></ul>
 </script>
 
 <script type="application/template" id="list-divider-template">
@@ -112,16 +112,16 @@
 <script type="application/template" id="view-detail-template">
     <h2 class="data-header">
         <img src="{{url}}"/>
-        {{name}}
+        <div class="name">{{name}}</div>
     </h2>
     
-    <div class="display-data">
+    <div class="display-data boxed-form">
     
     </div>
 </script>
 
 <script type="application/template" id="data-point-template">
-    <div class="data-point {{key}}">
+    <div class="data-point form-chunk {{key}}">
         <div class="label">{{key}}</div>
         <div class="value">{{value}}</div>
     </div>

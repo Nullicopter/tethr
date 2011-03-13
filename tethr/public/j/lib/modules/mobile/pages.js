@@ -60,6 +60,9 @@ Q.AddContactPage = Q.Module.extend('AddContactPage',{
         this.settings.profiles.bind('request:end', this.onRequestEnd);
         
         this.container.bind('pagebeforeshow', this.onPageBeforeShow);
+        
+        //save the last thing we entered into the notes field
+        this.lastNotes = '';
     },
     
     clickSaveButton: function(){
@@ -83,6 +86,7 @@ Q.AddContactPage = Q.Module.extend('AddContactPage',{
         else{
             this.n.header.text('Add');
             this.form.reset();
+            this.form.load({notes:this.lastNotes});
             this.n.cancel[0].href = '#listview';
         }
         this.form.focusFirst();
@@ -96,9 +100,11 @@ Q.AddContactPage = Q.Module.extend('AddContactPage',{
     formSubmit: function(e){
         var self = this;
         var profile = this.settings.current.get('profile');
+        var val = this.form.val();
+        this.lastNotes = val.notes || '';
         if(profile){
             profile.save({
-                data: this.form.val()
+                data: val
             }, {
                 success: function(){
                     self.trigger('editedprofile', profile);
@@ -106,7 +112,7 @@ Q.AddContactPage = Q.Module.extend('AddContactPage',{
             });
         }
         else
-            this.settings.profiles.addTether(this.form.val());
+            this.settings.profiles.addTether(val);
         
         return false;
     }
@@ -132,7 +138,7 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
     
     init: function(container, settings){
         this._super(container, settings);
-        _.bindAll(this, 'onAddProfile', 'onUpdateProfile')
+        _.bindAll(this, 'onAddProfile', 'onUpdateProfile', 'onRemoveProfile')
         var self = this;
         
         self.template = $(this.template);
@@ -140,6 +146,7 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
         self.itemTemplate = $(this.itemTemplate);
         
         self.settings.profiles.bind('add', this.onAddProfile);
+        self.settings.profiles.bind('remove', this.onRemoveProfile);
         self.settings.profiles.bind('change', this.onUpdateProfile);
         
         //de select the current profile when they view this page.
@@ -172,6 +179,14 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
         this.list.listview('refresh');
     },
     
+    hideEmptyItems: function(){
+        this.$('.list-divider').each(function(){
+            var t = $(this);
+            if(!t.next().is('.list-item'))
+                t.hide();
+        });
+    },
+    
     clickProfile: function(e){
         var targ = $(e.target);
         var eid = targ.attr('rel');
@@ -186,6 +201,14 @@ Q.ListContactsPage = Q.View.extend('ListContactsPage', {
         var item = this.list.find('#'+m.cid);
         item.remove();
         this.onAddProfile(m, m.collection);
+        this.hideEmptyItems();
+    },
+    
+    onRemoveProfile: function(m){
+        $.log('Removing profile....', m);
+        var item = this.list.find('#'+m.cid);
+        item.remove();
+        this.hideEmptyItems();
     },
     
     onAddProfile: function(m, coll){
