@@ -4,12 +4,17 @@
 Q.MobilePage = Q.Page.extend({
     pageId: 'body'
 });
+Q.FalseRedirectForm = Q.RedirectForm.extend('FalseRedirectForm', {
+    _onRedirect: function(url){
+        $.redirect(url, false);
+    }
+});
 
 Q.RegisterPage = Q.MobilePage.extend({
     run: function(){
         this._super.apply(this, arguments);
         
-        this.form = this.$('form').RedirectForm({
+        this.form = this.$('form').FalseRedirectForm({
             defaultData: { default_timezone: -(new Date().getTimezoneOffset())/60 },
             resetInitially: true
         });
@@ -21,7 +26,7 @@ Q.LoginPage = Q.MobilePage.extend({
     run: function(){
         this._super.apply(this, arguments);
         
-        this.form = this.$('form').RedirectForm({});
+        this.form = this.$('form').FalseRedirectForm({});
         this.form.focusFirst();
     }
 });
@@ -44,7 +49,7 @@ Q.AddContactPage = Q.Module.extend('AddContactPage',{
     
     init: function(container, settings){
         this._super(container, settings);
-        _.bindAll(this, 'formSubmit', 'onSuccess', 'onFail', 'onPageBeforeShow');
+        _.bindAll(this, 'formSubmit', 'onSuccess', 'onFail', 'onPageBeforeShow', 'locationHandler');
         
         var self = this;
         var form = this.$('form');
@@ -63,13 +68,28 @@ Q.AddContactPage = Q.Module.extend('AddContactPage',{
         
         //save the last thing we entered into the notes field
         this.lastNotes = '';
+        this.location = {};
+        //save the current location!
+        if(navigator.geolocation)
+            navigator.geolocation.getCurrentPosition(this.locationHandler, function(){
+                $.log('wtf', arguments);
+            });
     },
     
     clickSaveButton: function(){
         this.form.submit();
     },
     
+    locationHandler: function(loc){
+        $.log('at', loc, loc.coords.latitude, loc.coords.longitude);
+        this.location.latitude = loc.coords.latitude;
+        this.location.longitude = loc.coords.longitude;
+        
+        this.form.load(this.location);
+    },
+    
     onPageBeforeShow: function(){
+        
         var profile = this.settings.current.get('profile');
         if(profile){
             this.n.header.text('Edit');
@@ -86,9 +106,12 @@ Q.AddContactPage = Q.Module.extend('AddContactPage',{
         else{
             this.n.header.text('Add');
             this.form.reset();
-            this.form.load({notes:this.lastNotes});
+            this.form.load($.extend({
+                notes:this.lastNotes
+            }, this.location));
             this.n.cancel[0].href = '#listview';
         }
+        
         this.form.focusFirst();
     },
     

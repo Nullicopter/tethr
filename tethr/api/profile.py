@@ -17,9 +17,9 @@ ADMIN_EDIT_FIELDS = ['is_active']
 class TeatherForm(formencode.Schema):
     email = fv.Email(not_empty=True)
 
-@enforce(email=unicode, profile=profiles.Profile)
+@enforce(email=unicode, profile=profiles.Profile, latitude=float, longitude=float)
 @authorize()
-def teather(real_user, user, profile=None, email=None, **kw):
+def teather(real_user, user, profile=None, email=None, latitude=None, longitude=None, **kw):
     """
     Will teather/follow another user
     
@@ -70,7 +70,7 @@ def teather(real_user, user, profile=None, email=None, **kw):
     if email:
         profile.add_data(user, 'email', email)
     
-    t = user.profile.teather(profile)
+    t = user.profile.teather(profile, latitude=latitude, longitude=longitude)
     Session.flush()
     
     return t
@@ -83,6 +83,8 @@ def add_data(real_user, user, profile, **kw):
     """
     if not profile:
         abort(403)
+        
+    forbidden_keys = ['latitude', 'longitude']
     
     class KVForm(formencode.Schema):
         key = fv.UnicodeString(not_empty=True, min=2, max=64)
@@ -94,6 +96,8 @@ def add_data(real_user, user, profile, **kw):
         s = k.split(':', 1)
         if len(s) == 2:
             k, type = s
+        
+        if k in forbidden_keys: continue
         
         if v:
             scrubbed = validate(KVForm, key=k, value=v, type=type)

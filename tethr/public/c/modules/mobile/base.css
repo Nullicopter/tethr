@@ -15,7 +15,9 @@ img.avatar{
 .boxed-form{
     background: #fff;
     -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
     -moz-box-shadow: 1px 1px 2px #bbb;
+    -webkit-box-shadow: 1px 1px 2px #bbb;
     position: relative;
 }
 .boxed-form .form-chunk{
@@ -50,6 +52,7 @@ img.avatar{
 }
 .boxed-form .form-chunk textarea, .boxed-form .form-chunk .value{
     border: none;
+    border: 0;
     float: right;
     width: 73%;
     background: none;

@@ -57,6 +57,8 @@ class profile:
             
             if isinstance(t, Teather):
                 res['created_date'] = fdatetime(t.created_date)
+                res['latitude'] = t.latitude
+                res['longitude'] = t.longitude
             
             res['id'] = res['eid']
             res['user'] = None

@@ -79,7 +79,10 @@ Q.RedirectForm = Q.AsyncForm.extend('RedirectForm', {
         this._super.apply(this, arguments);
         
         if(data && data.results && data.results.url)
-            $.redirect(data.results.url);
+            this._onRedirect(data.results.url);
+    },
+    _onRedirect: function(url){
+        $.redirect(url);
     }
 });
 

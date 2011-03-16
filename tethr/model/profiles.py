@@ -62,7 +62,7 @@ class Profile(Base):
         """
         self.is_active = False
     
-    def teather(self, other_profile):
+    def teather(self, other_profile, latitude=None, longitude=None):
         """
         same as following. self.teather(other) means the current profile is following 'other'
         """
@@ -78,7 +78,7 @@ class Profile(Base):
         if recip:
             new = recip.accept()
         else:
-            new = Teather(owning_profile=self, teathered_profile=other_profile, status=STATUS_PENDING)
+            new = Teather(owning_profile=self, teathered_profile=other_profile, status=STATUS_PENDING, latitude=latitude, longitude=longitude)
             Session.add(new)
         
         return new
@@ -193,6 +193,9 @@ class Teather(Base):
     reciprocated_teather = relationship("Teather", remote_side=id, backref=backref("original_teather", uselist=False))
     
     created_date = sa.Column(sa.DateTime, nullable=False, default=now)
+    
+    latitude = sa.Column(sa.Float, nullable=True)
+    longitude = sa.Column(sa.Float, nullable=True)
     
     def __repr__(self):
         return u'Teather(%s, owned by: %s, teathered to: %s, status: %s, recip: %s)' % (self.id,

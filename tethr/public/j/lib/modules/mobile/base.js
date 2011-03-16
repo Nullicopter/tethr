@@ -52,6 +52,10 @@ Q.Profile = Q.Model.extend({
         }
         
         $.log('Parsing profile success', data.results);
+        var d = this.get('data');
+        if('latitude' in d) delete d['latitude'];
+        if('longitude' in d) delete d['longitude'];
+        
         return data.results;
     },
     

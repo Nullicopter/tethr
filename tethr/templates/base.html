@@ -42,7 +42,8 @@ if not c.meta:
     </head>
 
     <body id="${pylons.request.path.strip('/').replace('/','_')}" class="${a.is_logged_in() and 'user-logged-in' or ''}">
-		<div id="header"><header>
+		<%def name="navheader()">
+        <div id="header"><header>
 			<div id="header-inner"><hgroup>
                 <div id="header-right">
                 
@@ -73,6 +74,7 @@ if not c.meta:
                 <h2>Prolly gonna be no subtitle</h2>
             </hgroup></div>
 		</header></div>
+        </%def>
 		
 		<%def name="pre_content()"></%def>
 		${self.pre_content()}
@@ -89,9 +91,9 @@ if not c.meta:
 		
 		<div id="footer"><footer>
 			<div id="footer-inner">
-                <p>
-                    joann kuo & ben ogle made this
-                </p>
+                ##<p>
+                ##    joann kuo & ben ogle made this
+                ##</p>
             </div>
 		</footer></div>
         
