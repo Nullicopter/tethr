@@ -4,22 +4,22 @@ from tethr.config.frontend_modules import JS, CSS
 %>
 
 <%def name="include_js(production_file, files)">
-    % if not c.debug_frontend:
-        <script type="text/javascript" src="${h.static_url('j', production_file)}" ></script>
-    % else:
+    ##% if not c.debug_frontend:
+    ##    <script type="text/javascript" src="${h.static_url('j', production_file)}" ></script>
+    ##% else:
         % for f in files:
             <script type="text/javascript" src="${h.static_url('j', f)}" ></script>
         % endfor
-    % endif
+    ##% endif
 </%def>
 <%def name="include_css(production_file, files)">
-    % if not c.debug_frontend:
-        <link type="text/css" rel="stylesheet" href="${h.static_url('c', production_file)}" />
-    % else:
+    ##% if not c.debug_frontend:
+    ##    <link type="text/css" rel="stylesheet" href="${h.static_url('c', production_file)}" />
+    ##% else:
         % for f in files:
             <link type="text/css" rel="stylesheet" href="${h.static_url('c', f)}" />
         % endfor
-    % endif
+    ##% endif
 </%def>
 
 <%def name="require_js(*modules)">

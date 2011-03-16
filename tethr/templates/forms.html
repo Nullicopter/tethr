@@ -10,11 +10,11 @@
     <input type="password" name="${name}" value="${value}" ${disabled | n} ${attrs | n}/>
 </%def>
 
-<%def name="text(name, value=None, className=None, **attrs)">
+<%def name="text(name, value=None, className=None, type='text', **attrs)">
     <% value = _get_value(name, value) %>
     <% disabled = _get_disabled_state(attrs) %>
     <% attrs = _get_attrs(name, 'text', className, **attrs) %>
-    <input type="text" name="${name}" value="${value}" ${disabled | n} ${attrs | n}/>
+    <input type="${type}" name="${name}" value="${value}" ${disabled | n} ${attrs | n}/>
 </%def>
 
 <%def name="textarea(name, value=None, className=None, **attrs)">
@@ -89,9 +89,9 @@
 ## Form Chunkage
 ##
 
-<%def name="text_chunk(name, chunkId=None, chunkClass=None, label=None, sublabel=None, labelClass=None, value=None, info=None, tooltip=None, units=None, **inputAttrs)">
+<%def name="text_chunk(name, chunkId=None, chunkClass=None, label=None, sublabel=None, labelClass=None, value=None, info=None, tooltip=None, units=None, type='text', **inputAttrs)">
     ${form_chunk_start(name, chunkId=chunkId, chunkClass=chunkClass, label=label, sublabel=sublabel, labelClass=labelClass, tooltip=tooltip)}
-    ${text(name, value=value, **inputAttrs)}
+    ${text(name, value=value, type=type, **inputAttrs)}
     % if units == '$':
         <span class="units">${units}</span>
     % endif

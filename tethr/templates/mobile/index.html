@@ -73,7 +73,7 @@
 		
         <form class="boxed-form" action="${h.url_for(controller='mobile/auth', action='login')}" method="post">
             <% attr = {'data-role': 'none'} %>
-            ${f.text_chunk('email', **attr)}
+            ${f.text_chunk('email', type='email', **attr)}
             ${f.text_chunk('name', **attr)}
             
             ${f.textarea_chunk('notes')}
