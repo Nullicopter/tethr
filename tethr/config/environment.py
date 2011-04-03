@@ -36,6 +36,8 @@ def load_environment(global_conf, app_conf):
     config['pylons.h'] = tethr.lib.helpers
     config['pylons.strict_tmpl_context'] = False
     
+    config['beaker.session.cookie_expires'] = None
+    
     # Setup cache object as early as possible
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)

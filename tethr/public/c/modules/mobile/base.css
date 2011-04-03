@@ -21,8 +21,8 @@ img.avatar{
     position: relative;
 }
 .boxed-form .form-chunk{
-    line-height: 30px;
-    min-height: 30px;
+    line-height: 34px;
+    min-height: 34px;
     border-top: 1px solid #ccc;
 }
 .boxed-form .form-chunk:first-child{
@@ -37,32 +37,51 @@ img.avatar{
     display: block;
     float: left;
     font-size: 8pt;
-    line-height: 30px;
+    line-height: 34px;
 }
 .boxed-form .form-chunk input{
     float: right;
     width: 73%;
-    height: 26px;
+    height: 30px;
     border: none;
     background: none;
     padding: 0;
     margin: 0;
-    font-size: 9pt;
+    font-size: 11pt;
     margin: 2px 0 0 0;
 }
-.boxed-form .form-chunk textarea, .boxed-form .form-chunk .value{
+.boxed-form .form-chunk textarea{
     border: none;
     border: 0;
     float: right;
     width: 73%;
     background: none;
-    font-size: 9pt;
+    font-size: 11pt;
     -moz-box-shadow: 0 0 0;
     -webkit-box-shadow: 0 0 0;
     -moz-border-radius: 0;
     -webkit-border-radius: 0;
     outline: 0;
 }
+.boxed-form .form-chunk .value{
+    border: none;
+    border: 0;
+    margin-left: 27%;
+    background: none;
+    font-size: 11pt;
+    -moz-box-shadow: 0 0 0;
+    -webkit-box-shadow: 0 0 0;
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+    outline: 0;
+    line-height: 23px;
+    padding: 5px 0;
+}
+
+.boxed-form .form-chunk textarea{
+    min-height: 100px;
+}
+
 .boxed-form .form-chunk .pre-end{
     clear: both;
 }
